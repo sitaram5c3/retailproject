@@ -1,0 +1,78 @@
+﻿@{
+    ViewBag.Title = "user";
+}
+
+<h2>User Methods Test Page</h2>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $("#sendRequestUserAccount").click(function () { 
+            $.getJSON("user/RequestUserAccount", { name: $("#name").val(), level: $("#level").val(), password: $("#passwordcreate").val(), telephone: $("#telephone").val(), email: $("#email").val() }).done(function (json) {
+                $("#resultSendRequestUserAccount").val(JSON.stringify(json));
+            })
+        });
+
+        $("#getUser").click(function () {
+            $.getJSON("user/GetUser", { guid: $("#guid").val() }).done(function (json) {
+                $("#resultGetUser").val(JSON.stringify(json));
+            })
+        });
+
+        $("#userLogout").click(function () {
+            $.getJSON("user/UserLogout", { email: $("#emailUserLogout").val() }).done(function (json) {
+                $("#resultUserLogout").val(JSON.stringify(json));
+            })
+        });
+
+        $("#userLogin").click(function () {
+            $.getJSON("user/UserLogin", { email: $("#emailUserLogin").val(), password: $("#passwordUserLogin").val() }).done(function (json) {
+                $("#resultUserLogin").val(JSON.stringify(json));
+            })
+        });                
+
+    });
+
+</script>
+
+<form>
+    Method: user/SendRequestUserAccount
+    <p>Name <br /><input id="name" /><p />
+    <p>Password<br /><input id="passwordcreate"></p>
+    <p>Level consumer = 0, retailer = 1</p><input id="level" />
+    <p>Telephone <br /><input id="telephone" /><p />
+    <p>Email <br /><input id="email" /><p />
+    <p>Result<br /> <textarea id="resultSendRequestUserAccount" rows="20" style="width:400px"></textarea><br />
+       <input id="sendRequestUserAccount" type="button" value="submit" /><br /></p>
+    <hr />
+</form>
+
+<form>
+    Method: user/UserLogin
+    <p>Email<br /><input id="emailUserLogin" /><p />
+    <p>Password<br /><input id="passwordUserLogin" /><p />
+    <p>
+        Result<br /> <textarea id="resultUserLogin" rows="20" style="width:400px"></textarea><br />
+        <input id="userLogin" type="button" value="submit" /><br />
+    </p>
+    <hr />
+</form>
+<form>
+    Method user/GetUser
+    <p>GUID<br /><input id="guid" /><p />
+    <p>
+        Result <br /><textarea id="resultGetUser" rows="20" style="width:400px"></textarea><br />
+        <input id="getUser" type="button" value="submit" /><br />
+    </p>
+    <hr />
+</form>
+
+<form>
+    Method user/LogOff
+    <p>Email<br /><input id="emailUserLogout" /><p />
+    <p>
+        Result <br /><textarea id="resultUserLogout" rows="20" style="width:400px"></textarea><br />
+        <input id="userLogout" type="button" value="submit" /><br />
+    </p>
+    <hr />
+</form>

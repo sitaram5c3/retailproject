@@ -1,0 +1,128 @@
+﻿@{
+    ViewBag.Title = "product";
+}
+
+<h2>Product Methods Test Page</h2>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+
+        $("#addNewBeaconSubmit").click(function () {
+
+            var Product = new Object();
+            Product.ID = 2;
+            Product.manufacturer = "manu";
+            Product.productName = "productname";
+            Product.imageInstallationURL = "img1";
+            Product.availableStock = 33;
+            Product.numberOfVisits = 354;
+            Product.price = 34.34;
+            Product.UUID = "fgdhfjj";
+            Product.category = "ewrrtyu";
+            Product.productOwner = 2;
+
+            var User = new Object();
+            User.UserId = "edward";
+
+            var UIObject = new Object();
+            UIObject.User = User;
+            UIObject.Product = Product;
+            var dataSend = { UserId: $("#addNewBeaconUserId").val(), UUID: $("#addNewBeaconUUID").val(), product: obj };
+           
+            $.post("/product/addNewBeacon/", UIObject, function (data) { }, "json");
+
+            //$.ajax({
+            //    type: 'POST',
+            //    url: '/product/addNewBeacon/',
+            //    //data: JSON.parse({ Product: obj }),
+            //    data: JSON.stringify({ "Product": Product }),
+            //    dataType: 'json',
+            //    success: function(data) {  }
+            //    //contentType: "application/json",
+                
+            //});
+
+
+
+            //$.ajax({
+            //    dataType: "json",
+            //    type: "POST",
+            //    url: "product/addNewBeacon",
+            //    data: { UserId: $("#addNewBeaconUserId").val(), UUID: $("#addNewBeaconUUID").val(), product:  },
+            //    success: function(){
+            //        $("#resultaddNewBeacon").val(JSON.stringify(json));
+            //    }
+            //});
+
+            //$.getJSON("product/addNewBeacon", dataType: "json", { UserId: $("#addNewBeaconUserId").val(), UUID: $("#addNewBeaconUUID").val(), product: $("#addNewBeaconProduct").val()}).done(function (json) {
+            //    $("#resultaddNewBeacon").val(JSON.stringify(json));
+            //})
+        });
+
+        $("#SendRequestremoveBeaconTEST_ONLYUUID").click(function () {
+            $.getJSON("product/removeBeaconTEST_ONLY", { UUID: $("#removeBeaconTEST_ONLYUUID").val() }).done(function (json) {
+                $("#resultremoveBeaconTEST_ONLY").val(JSON.stringify(json));
+            })
+        });
+
+        $("#sendRequestgetProduct").click(function () {
+            $.getJSON("product/getProduct", { UUID: $("#getProductUUID").val() }).done(function (json) {
+                $("#resultgetProduct").val(JSON.stringify(json));
+            })
+        });
+     
+        $("#sendRequestgetProductsInCategory").click(function () {
+            $.getJSON("product/getProductsInCategory", { category: $("#category").val() }).done(function (json) {
+                $("#resultGetProductsInCategory").val(JSON.stringify(json));
+            })
+        });   
+
+    });
+
+</script>
+
+<form>
+    Method: product/getProductsInCategory(string Category)
+    <p>Category<br /><input id="category" /><p />
+    <p>
+        Result<br /> <textarea id="resultGetProductsInCategory" rows="20" style="width:400px"></textarea><br />
+        <input id="sendRequestgetProductsInCategory" type="button" value="submit" /><br />
+    </p>
+    <hr />
+</form>
+
+<form>
+    Method: product/getProduct(string UUID)
+    <p>UUID<br /><input id="getProductUUID" /><p />
+    <p>
+        Result<br /> <textarea id="resultgetProduct" rows="20" style="width:400px"></textarea><br />
+        <input id="sendRequestgetProduct" type="button" value="submit" /><br />
+    </p>
+    <hr />
+</form>
+
+<form>
+    Method product/removeBeaconTEST_ONLY(string UUID)
+    <p>UUID<br /><input id="removeBeaconTEST_ONLYUUID" /><p />
+    <p>
+        Result <br /><textarea id="resultremoveBeaconTEST_ONLY" rows="20" style="width:400px"></textarea><br />
+        <input id="SendRequestremoveBeaconTEST_ONLYUUID" type="button" value="submit" /><br />
+    </p>
+    <hr />
+</form>
+
+<form>
+    Method Product/addNewBeacon(string UserId, string UUID, product Product)
+    <p>UserId<br /><input id="addNewBeaconUserId" /><p />
+    <p>UUID<br /><input id="addNewBeaconUUID" /><p />
+     <p>Product<br /><textarea rows="10" style="width:400px" id="addNewBeaconProduct"></textarea><p />
+    <p>
+        Result <br /><textarea id="resultaddNewBeacon" rows="20" style="width:400px"></textarea><br />
+        <input id="addNewBeaconSubmit" type="button" value="submit" /><br />
+    </p>
+    <hr />
+</form>
+
+
