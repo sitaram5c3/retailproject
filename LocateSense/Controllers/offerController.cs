@@ -64,7 +64,7 @@ namespace LocateSense.Controllers
         /// <summary>
         /// Updates current offers on system
         /// </summary>
-        /// <param name="userId"></param>
+        /// <param name="user guid"></param>
         /// <param name="offerID"></param>
         /// <param name="startDateTime"></param>
         /// <param name="endDateTime"></param>
@@ -74,7 +74,7 @@ namespace LocateSense.Controllers
         /// <param name="price"></param>
         /// <param name="productId"></param>
         /// <returns>offer updated message</returns>
-        public ActionResult upDateProductOffer( string userId,
+        public ActionResult upDateProductOffer( string userGUID,
                                                  int offerID,
                                                  DateTime? startDateTime,
                                                  DateTime? endDateTime,
@@ -85,7 +85,7 @@ namespace LocateSense.Controllers
                                                  int productId     )
         {
             //adds a offer to a product!!
-            var User = db.users.Where(x => x.guid == userId);
+            var User = db.users.Where(x => x.guid == userGUID);
             if (User == null) return Json(new { message = "Not Valid user" }, JsonRequestBehavior.AllowGet);
 
             var OfferDb = (from of in db.offers
@@ -137,12 +137,12 @@ namespace LocateSense.Controllers
         /// <summary>
         /// Disables an offer
         /// </summary>
-        /// <param name="userId">user id</param>
+        /// <param name="userId">user guid</param>
         /// <param name="offerId">offer id</param>
         /// <returns></returns>
-        public ActionResult disableOffer(string userId, int offerId)
+        public ActionResult disableOffer(string userGUID, int offerId)
         {
-            user User = db.users.Where(x => x.guid == userId).SingleOrDefault();
+            user User = db.users.Where(x => x.guid == userGUID).SingleOrDefault();
             if (User == null) return Json(new { message = "Incorrect user" }, JsonRequestBehavior.AllowGet);
 
             var offerDisable = (from of in db.offers

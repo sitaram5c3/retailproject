@@ -25,7 +25,7 @@ namespace LocateSense.Controllers
         /// <summary>
         /// get the user details
         /// </summary>
-        /// <param name="GUID">user id</param>
+        /// <param name="GUID">user guid</param>
         /// <returns></returns>
         public JsonResult getUser(string GUID)
         {

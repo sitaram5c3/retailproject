@@ -10,7 +10,28 @@ namespace LocateSense.Controllers
 {
     public class productController : Controller
     {
-        
+
+        /// <summary>
+        /// gets the products for a user
+        /// </summary>
+        /// <param name="UUID">user GUID</param>
+        /// <returns></returns>
+        public JsonResult getRetailerProducts(string userGUID)
+        {
+            var user = db.users.Where(x => x.guid == userGUID).SingleOrDefault();
+            if (user == null) return Json(new { message = "No user" }, JsonRequestBehavior.AllowGet);
+            if (user.level != 1) return Json(new { message = "User is not retailer" }, JsonRequestBehavior.AllowGet);
+
+            var product = db.products.Where(x => x.productOwner == user.ID);
+            if (product == null)
+            {
+                return Json(new { message = "No products" }, JsonRequestBehavior.AllowGet);
+            }
+
+            return Json(product, JsonRequestBehavior.AllowGet);
+        }
+
+
         /// <summary>
         /// search for the products in categories
         /// </summary>
@@ -80,7 +101,7 @@ namespace LocateSense.Controllers
         /// <param name="UUID">UUID beacon ID</param>
         /// <param name="Product">product model</param>
         /// <returns>Product object</returns>
-        public JsonResult addNewBeacon( string UserId, 
+        public JsonResult addNewBeacon( string UserGUID, 
                                         string manufacturer, 
                                         string productName, 
                                         string imageURL, 
@@ -91,7 +112,7 @@ namespace LocateSense.Controllers
                                         string UUID,
                                         string category   )
         {
-            var user = db.users.Where(x => x.guid == UserId).SingleOrDefault();
+            var user = db.users.Where(x => x.guid == UserGUID).SingleOrDefault();
             if (user == null) return Json(new { message = "No user" }, JsonRequestBehavior.AllowGet);
             if (user.level != 1) return Json(new { message = "User is not retailer" }, JsonRequestBehavior.AllowGet);
             var productBeacon = db.products.Where(x => x.UUID == UUID);
@@ -111,10 +132,10 @@ namespace LocateSense.Controllers
         /// <summary>
         /// updates the product
         /// </summary>
-        /// <param name="UserId">user id</param>
+        /// <param name="UserId">user GUID</param>
         /// <param name="Product">product updates, null parameter are not updated on system</param>
         /// <returns></returns>
-        public JsonResult upDateProduct(string UserId,
+        public JsonResult upDateProduct(string UserGUID,
                                         string manufacturer,
                                         string productName,
                                         string imageURL,
@@ -124,7 +145,7 @@ namespace LocateSense.Controllers
                                         string UUID,
                                         string category)
         {
-            var user = db.users.Where(x => x.guid == UserId).SingleOrDefault();
+            var user = db.users.Where(x => x.guid == UserGUID).SingleOrDefault();
             if (user == null) return Json(new { message = "No user" }, JsonRequestBehavior.AllowGet);
             if (user.level != 1) return Json(new { message = "User is not retailer" }, JsonRequestBehavior.AllowGet);
 

@@ -46,14 +46,14 @@ namespace LocateSense.Controllers
         /// <summary>
         /// Get the users visits
         /// </summary>
-        /// <param name="userId">user id</param>
+        /// <param name="userId">user guid</param>
         /// <param name="numberOfDays">nmuber of days</param>
         /// <returns></returns>
-        public ActionResult getLastUserBeaconVists(string userId, int numberOfDays)
+        public ActionResult getLastUserBeaconVists(string userGUID, int numberOfDays)
         {
 
             //return products user visted in last number day sorted by most recent
-            var User = db.users.Where(x => x.guid == userId);
+            var User = db.users.Where(x => x.guid == userGUID);
             if (User == null)
             {
                 return Json(new { message = "Not valid  user" }, JsonRequestBehavior.AllowGet);
