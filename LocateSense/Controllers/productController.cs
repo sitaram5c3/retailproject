@@ -1,15 +1,122 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Dynamic;
+using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using LocateSense.Models;
+using Microsoft.WindowsAzure;
+using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.Auth;
+using Microsoft.WindowsAzure.Storage.Blob;
 
 namespace LocateSense.Controllers
 {
     public class productController : Controller
     {
+        public void getImage()
+        {
+      
+            // Retrieve storage account from connection string.
+            CloudStorageAccount storageAccount = CloudStorageAccount.Parse(
+            CloudConfigurationManager.GetSetting("StorageConnectionString"));
+
+            // Create the blob client.
+            CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
+
+            // Retrieve a reference to a container. 
+            CloudBlobContainer container = blobClient.GetContainerReference("image");
+
+            foreach (IListBlobItem item in container.ListBlobs(null, true))
+            {
+                System.Diagnostics.Debug.Print(item.Uri.AbsoluteUri);
+            }
+
+            CloudBlockBlob blockBlob = container.GetBlockBlobReference(DateTime.Now.ToFileTimeUtc().ToString());
+
+            // Create or overwrite the "myblob" blob with contents from a local file.
+            using (var fileStream = System.IO.File.OpenRead(@"C:\data\locatesense\website\locatesensewebsite\images\marker.png"))
+            {
+                blockBlob.UploadFromStream(fileStream);
+            } 
+
+
+
+        }
+
+        /// <summary>
+        /// Save the installation image 
+        /// </summary>
+        /// <param name="UserGUID">User ID</param>
+        /// <param name="UUID">Product UUID</param>
+        /// <param name="file">Image file</param>
+        /// <returns>Absolute URL of image</returns>
+        [HttpPost]
+        public ActionResult SaveInstallationImage(string userGUID, string UUID, HttpPostedFileBase file)
+        {
+            var user = db.users.Where(x => x.guid == userGUID).SingleOrDefault();
+            if (user == null) return Json(new { message = "No user" }, JsonRequestBehavior.AllowGet);
+            if (user.level != 1) return Json(new { message = "User is not retailer" }, JsonRequestBehavior.AllowGet);
+
+            var product = db.products.Where(x => x.productOwner == user.ID).SingleOrDefault();
+            if (product == null)
+            {
+                return Json(new { message = "No product for UUID" }, JsonRequestBehavior.AllowGet);
+            }
+
+            if (file != null && file.ContentLength > 0)
+            {
+                CloudStorageAccount storageAccount = CloudStorageAccount.Parse(
+                CloudConfigurationManager.GetSetting("StorageConnectionString"));
+                CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
+                CloudBlobContainer container = blobClient.GetContainerReference("image");
+                CloudBlockBlob blockBlob = container.GetBlockBlobReference(DateTime.Now.ToFileTimeUtc().ToString() + "-" + file.FileName);
+                blockBlob.UploadFromStream(file.InputStream);
+                product.imageInstallationURL = blockBlob.Uri.AbsoluteUri;
+                db.SaveChanges();
+                return Json(new { message = blockBlob.Uri.AbsoluteUri }, JsonRequestBehavior.AllowGet);
+            }
+            return Json(new { message = "Not uploaded" }, JsonRequestBehavior.AllowGet);
+        }
+
+
+        /// <summary>
+        /// Save the product image 
+        /// </summary>
+        /// <param name="UserGUID">User ID</param>
+        /// <param name="UUID">Product UUID</param>
+        /// <param name="file">Image file</param>
+        /// <returns>Absolute URL of image</returns>
+        [HttpPost]
+        public ActionResult SaveProductImage(string userGUID, string UUID, HttpPostedFileBase file)
+        {
+            var user = db.users.Where(x => x.guid == userGUID).SingleOrDefault();
+            if (user == null) return Json(new { message = "No user" }, JsonRequestBehavior.AllowGet);
+            if (user.level != 1) return Json(new { message = "User is not retailer" }, JsonRequestBehavior.AllowGet);
+
+            var product = db.products.Where(x => x.productOwner == user.ID).SingleOrDefault();
+            if (product == null)
+            {
+                return Json(new { message = "No product for UUID" }, JsonRequestBehavior.AllowGet);
+            }
+
+            if (file != null && file.ContentLength > 0)
+            {
+                CloudStorageAccount storageAccount = CloudStorageAccount.Parse(
+                CloudConfigurationManager.GetSetting("StorageConnectionString"));
+                CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
+                CloudBlobContainer container = blobClient.GetContainerReference("image");
+                CloudBlockBlob blockBlob = container.GetBlockBlobReference(DateTime.Now.ToFileTimeUtc().ToString() + "-" + file.FileName);
+                blockBlob.UploadFromStream(file.InputStream);
+                product.imageURL = blockBlob.Uri.AbsoluteUri;
+                db.SaveChanges();
+                return Json(new { message = blockBlob.Uri.AbsoluteUri }, JsonRequestBehavior.AllowGet);
+            }
+            return Json(new { message = "Not uploaded" }, JsonRequestBehavior.AllowGet);
+        }
+
+
 
         /// <summary>
         /// gets the products for a user
@@ -22,7 +129,7 @@ namespace LocateSense.Controllers
             if (user == null) return Json(new { message = "No user" }, JsonRequestBehavior.AllowGet);
             if (user.level != 1) return Json(new { message = "User is not retailer" }, JsonRequestBehavior.AllowGet);
 
-            var product = db.products.Where(x => x.productOwner == user.ID);
+            var product = db.products.Where(x => x.productOwner == user.ID).SingleOrDefault();
             if (product == null)
             {
                 return Json(new { message = "No products" }, JsonRequestBehavior.AllowGet);
@@ -115,7 +222,8 @@ namespace LocateSense.Controllers
             var user = db.users.Where(x => x.guid == UserGUID).SingleOrDefault();
             if (user == null) return Json(new { message = "No user" }, JsonRequestBehavior.AllowGet);
             if (user.level != 1) return Json(new { message = "User is not retailer" }, JsonRequestBehavior.AllowGet);
-            var productBeacon = db.products.Where(x => x.UUID == UUID);
+            var productBeacon = db.products.Where(x => x.UUID == UUID).SingleOrDefault();
+            
             if (productBeacon != null)
             {
                 return Json(new { message = "This beacon already on system" }, JsonRequestBehavior.AllowGet);
@@ -123,8 +231,15 @@ namespace LocateSense.Controllers
             product Product = new product();
             Product.productOwner = user.ID;
             Product.UUID = UUID;
+
+            Product.manufacturer =  manufacturer;
+            Product.productName  = productName;       
+            if(availableStock != null) Product.availableStock = (int)availableStock;
+            if(numberOfVisits != null) Product.numberOfVisits = (int)numberOfVisits;
+            if (price != null) Product.price = (decimal)price;
             Product.category = @"\";
             db.products.Add(((product)Product));
+            db.SaveChanges();
             //if new product can add
             return Json(Product, JsonRequestBehavior.AllowGet);
         }
@@ -202,6 +317,7 @@ namespace LocateSense.Controllers
 
         public ActionResult Index()
         {
+          //  getImage();
             return View();
         }
 

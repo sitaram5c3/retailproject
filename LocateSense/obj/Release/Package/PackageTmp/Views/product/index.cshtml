@@ -83,6 +83,15 @@
 
 </script>
 
+<form action="product/SaveInstallationImage" method="post" enctype="multipart/form-data">
+    <label for="file">Filename:</label>
+    <input type="file" name="file" ><br>
+    <input type="text" name="UserGUID" value="user guid value"><br>
+    <input type="text" name="UUID" value="uuid value"><br>
+    <input type="submit" name="submit" value="Submit">
+</form>
+
+
 <form>
     Method: product/getProductsInCategory(string Category)
     <p>Category<br /><input id="category" /><p />
