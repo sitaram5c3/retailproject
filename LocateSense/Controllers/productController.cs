@@ -129,8 +129,8 @@ namespace LocateSense.Controllers
             if (user == null) return Json(new { message = "No user" }, JsonRequestBehavior.AllowGet);
             if (user.level != 1) return Json(new { message = "User is not retailer" }, JsonRequestBehavior.AllowGet);
 
-            var product = db.products.Where(x => x.productOwner == user.ID).SingleOrDefault();
-            if (product == null)
+            var product = db.products.Where(x => x.productOwner == user.ID);
+           if (product.Count() == 0)
             {
                 return Json(new { message = "No products" }, JsonRequestBehavior.AllowGet);
             }
@@ -147,8 +147,8 @@ namespace LocateSense.Controllers
         public JsonResult getProductsInCategory(string Category)
         {
 
-            product product = db.products.Where(x => x.category.Contains(Category) ).SingleOrDefault();
-            if (product == null)
+            var product = db.products.Where(x => x.category.Contains(Category) );
+            if (product.Count() == 0)
             {
                 return Json(new { message = "No products in category " + Category }, JsonRequestBehavior.AllowGet);
             }
@@ -163,13 +163,17 @@ namespace LocateSense.Controllers
         /// <returns></returns>
         public JsonResult getProduct(string UUID)
         {
-            product product = db.products.Where(x => x.UUID == UUID).SingleOrDefault();
+            var product = db.products.Where(x => x.UUID == UUID);
             if (product == null)
             {
                 return Json(new { message = "No product" }, JsonRequestBehavior.AllowGet);
             }
-
-            return Json(product, JsonRequestBehavior.AllowGet);
+            else if (product.Count() == 1)
+            {
+                return Json(product.SingleOrDefault(), JsonRequestBehavior.AllowGet);
+            }
+            return Json(new { message = "System Error - multiple products with identical UUID" }, JsonRequestBehavior.AllowGet);
+            
         }
 
         /// <summary>
@@ -179,23 +183,32 @@ namespace LocateSense.Controllers
         /// <returns></returns>
         public JsonResult removeBeaconTEST_ONLY(string UUID)
         {
-            var productBeacon = db.products.Where(x => x.UUID == UUID);
-            if(productBeacon == null) Json(new { message = "Not valid UUID" }, JsonRequestBehavior.AllowGet);
 
-            var deleteOffers = db.offers.Where(x => x.productId == productBeacon.SingleOrDefault().ID);
-            foreach (var offerToDelete in deleteOffers)
-            {
-                db.offers.Remove(offerToDelete);
-            }
+                var productBeacon = db.products.Where(x => x.UUID == UUID);
+                if (productBeacon == null) Json(new { message = "Not valid UUID" }, JsonRequestBehavior.AllowGet);
+                
+                try
+                {
+                    var deleteOffers = db.offers.Where(x => x.productId == productBeacon.SingleOrDefault().ID);
+                    foreach (var offerToDelete in deleteOffers)
+                    {
+                        db.offers.Remove(offerToDelete);
+                    }
 
-            var deleteLocate = db.locate.Where(x => x.beaconId == productBeacon.SingleOrDefault().ID);
-            foreach (var locateToDelete in deleteLocate)
-            {
-                db.locate.Remove(locateToDelete);
-            }
-
-            db.products.Remove(productBeacon.SingleOrDefault());
-            db.SaveChanges();
+                    var deleteLocate = db.locate.Where(x => x.beaconId == productBeacon.SingleOrDefault().ID);
+                    foreach (var locateToDelete in deleteLocate)
+                    {
+                        db.locate.Remove(locateToDelete);
+                    }
+                }
+                catch (Exception ex) { }
+                try
+                {
+                    db.products.Remove(productBeacon.SingleOrDefault());
+                    db.SaveChanges();
+                }
+                catch (Exception ex) { }
+                
 
             return Json(new { message = "deleted UUID beacon and its associated offers from system" }, JsonRequestBehavior.AllowGet);
 
@@ -219,9 +232,9 @@ namespace LocateSense.Controllers
                                         string UUID,
                                         string category   )
         {
-            var user = db.users.Where(x => x.guid == UserGUID).SingleOrDefault();
-            if (user == null) return Json(new { message = "No user" }, JsonRequestBehavior.AllowGet);
-            if (user.level != 1) return Json(new { message = "User is not retailer" }, JsonRequestBehavior.AllowGet);
+            var user = db.users.Where(x => x.guid == UserGUID);
+            if (user.Count() == 0) return Json(new { message = "No user" }, JsonRequestBehavior.AllowGet);
+            if (user.SingleOrDefault().level != 1) return Json(new { message = "User is not retailer" }, JsonRequestBehavior.AllowGet);
             var productBeacon = db.products.Where(x => x.UUID == UUID).SingleOrDefault();
             
             if (productBeacon != null)
@@ -229,7 +242,7 @@ namespace LocateSense.Controllers
                 return Json(new { message = "This beacon already on system" }, JsonRequestBehavior.AllowGet);
             }
             product Product = new product();
-            Product.productOwner = user.ID;
+            Product.productOwner = user.SingleOrDefault().ID;
             Product.UUID = UUID;
 
             Product.manufacturer =  manufacturer;
@@ -264,8 +277,8 @@ namespace LocateSense.Controllers
             if (user == null) return Json(new { message = "No user" }, JsonRequestBehavior.AllowGet);
             if (user.level != 1) return Json(new { message = "User is not retailer" }, JsonRequestBehavior.AllowGet);
 
-            var ProductDB = db.products.Where(x => x.UUID == UUID && x.productOwner == user.ID).SingleOrDefault();
-            if (ProductDB == null)
+            var ProductDB = db.products.Where(x => x.UUID == UUID && x.productOwner == user.ID);
+            if (ProductDB.Count() == 0)
             {
                 if (db.products.Where(x => x.UUID == UUID).SingleOrDefault() != null)
                 {
@@ -273,7 +286,7 @@ namespace LocateSense.Controllers
                 }
                 else
                 {
-                    return Json(new { message = "This is not you product" }, JsonRequestBehavior.AllowGet);
+                    return Json(new { message = "This is not your product" }, JsonRequestBehavior.AllowGet);
                 }
             }
 
@@ -293,13 +306,13 @@ namespace LocateSense.Controllers
                 }
             }
 
-            if (category != null) ProductDB.category = catStr;
-            if (availableStock != null) ProductDB.availableStock = (int)availableStock;
-            if (imageInstallationURL != null) ProductDB.imageInstallationURL = imageInstallationURL.ToString();
-            if (imageURL != null) ProductDB.imageURL = imageURL.ToString();
-            if (manufacturer != null) ProductDB.manufacturer = manufacturer;
-            if (price != null) ProductDB.price = (decimal)price;
-            if (productName != null) ProductDB.productName = productName.ToString();
+            if (category != null) ((product)ProductDB).category = catStr;
+            if (availableStock != null)  ((product)ProductDB).availableStock = (int)availableStock;
+            if (imageInstallationURL != null) ((product)ProductDB).imageInstallationURL = imageInstallationURL.ToString();
+            if (imageURL != null)  ((product)ProductDB).imageURL = imageURL.ToString();
+            if (manufacturer != null)  ((product)ProductDB).manufacturer = manufacturer;
+            if (price != null)  ((product)ProductDB).price = (decimal)price;
+            if (productName != null)  ((product)ProductDB).productName = productName.ToString();
             db.SaveChanges();
 
             //if new product can add

@@ -4,7 +4,7 @@
     <parameterEntry kind="ProviderPath" scope="IisApp" match="^C:\\Users\\edward\ mellor\\Documents\\Visual\ Studio\ 2013\\Projects\\LocateSense\\retailproject\\LocateSense\\obj\\Release\\Package\\PackageTmp$" />
     <parameterEntry kind="ProviderPath" scope="setAcl" match="^C:\\Users\\edward\ mellor\\Documents\\Visual\ Studio\ 2013\\Projects\\LocateSense\\retailproject\\LocateSense\\obj\\Release\\Package\\PackageTmp$" />
   </parameter>
-  <parameter name="LocateSenseContext-Web.config Connection String" description="" value="Data Source=oieqxbnmbs.database.windows.net;Integrated Security=False;User ID=apiservice;Initial Catalog=beacons; Password=Instantview_2014;Connect Timeout=60;Encrypt=False;TrustServerCertificate=False" tags="">
+  <parameter name="LocateSenseContext-Web.config Connection String" description="" value="Data Source=oieqxbnmbs.database.windows.net;Initial Catalog=beacons;Integrated Security=False;User ID=apiservice;Password=Instantview_2014;Connect Timeout=60;Encrypt=False;TrustServerCertificate=False" tags="">
     <parameterEntry kind="XmlFile" scope="C:\\Users\\edward\ mellor\\Documents\\Visual\ Studio\ 2013\\Projects\\LocateSense\\retailproject\\LocateSense\\obj\\Release\\Package\\PackageTmp\\Web\.config$" match="/configuration/connectionStrings/add[@name='LocateSenseContext']/@connectionString" />
   </parameter>
 </parameters>

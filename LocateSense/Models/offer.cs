@@ -14,7 +14,25 @@ namespace LocateSense.Models
         public string description { set; get; }
         public string strapLine {set; get;}
         public decimal? price {set; get;}
-        public int productId {set; get;} 
+        public int productId {set; get;}
+
+        public enum dayFilterenum
+        {
+            Sun,
+            Mon,
+            Tue,
+            Wed,
+            Thu,
+            Fri,
+            Sat,
+            All,
+            Weekend,
+            Weekday,
+            BankHol
+        }
+        
+ 
+        
         
     }
 }

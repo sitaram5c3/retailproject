@@ -40,24 +40,21 @@ namespace LocateSense.Controllers
                                              string title ,
                                              string description,
                                              string strapLine,
-                                             decimal? price,
-                                             int productId)
+                                             decimal? price)
         {
             //adds a offer to a product!!
             product Product = db.products.Where(x => x.UUID == beaconUUID).SingleOrDefault();
             if (Product == null) return Json(new { message = "Not Valid beacon UUID" }, JsonRequestBehavior.AllowGet);
-            productId = Product.ID;
             offer offerDB = new offer();
+            offerDB.productId = Product.ID;     
             if (price != null) offerDB.price = price;           
             if (startDateTime != null) offerDB.startDateTime = startDateTime;
             if (strapLine != null) offerDB.strapLine = strapLine;
             if (title != null) offerDB.title = title;
             if (endDateTime != null) offerDB.endDateTime = endDateTime;
             if (description != null) offerDB.description = description;
-
              db.offers.Add(offerDB);
              db.SaveChanges();
-
              return Json( offerDB, JsonRequestBehavior.AllowGet);
 
         }
@@ -117,13 +114,61 @@ namespace LocateSense.Controllers
         /// </summary>
         /// <param name="productId">pass in product ID NOT UUID</param>
         /// <returns></returns>
-        public ActionResult getProductOffers(int productId)
+        public ActionResult getProductOffersByUUID(string beaconUUID)
         {
 
             var Offers = (from of in db.offers
                           join pr in db.products on of.productId equals pr.ID
-                          where  pr.ID == productId
+                          where pr.UUID == beaconUUID && of.endDateTime > DateTime.Now && of.startDateTime < DateTime.Now
                           select of);
+
+
+            if (Offers == null)
+            {
+                //Offers.Where(of => dayFilter(of.productId));
+                return Json(new { message = "No offers for this product" }, JsonRequestBehavior.AllowGet);
+            }
+
+            return Json(Offers.ToList(), JsonRequestBehavior.AllowGet);
+        }
+
+        Func<int, string> func1 = (x) => string.Format("string = {0}", x);
+
+        public bool dayFilter(int day){
+            DayOfWeek today = DateTime.Now.DayOfWeek;
+
+            if (    (DayOfWeek)day == today) return true;
+
+            if (    (offer.dayFilterenum)day == offer.dayFilterenum.All) return true;
+
+            if (    (offer.dayFilterenum)day == offer.dayFilterenum.Weekend && 
+                    (offer.dayFilterenum)day == offer.dayFilterenum.Sat && 
+                    (offer.dayFilterenum)day == offer.dayFilterenum.Sun) return true;
+
+            if (    (offer.dayFilterenum)day == offer.dayFilterenum.Weekday &&
+                    (offer.dayFilterenum)day == offer.dayFilterenum.Mon &&
+                    (offer.dayFilterenum)day == offer.dayFilterenum.Tue &&
+                    (offer.dayFilterenum)day == offer.dayFilterenum.Wed &&
+                    (offer.dayFilterenum)day == offer.dayFilterenum.Thu &&
+                    (offer.dayFilterenum)day == offer.dayFilterenum.Fri) return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// return products sorted by most recent offers
+        /// </summary>
+        /// <param name="productId">pass in product ID NOT UUID</param>
+        /// <returns></returns>
+        public ActionResult getProductOffersByProductID(int productId)
+        {
+
+            var Offers = (from of in db.offers
+                          join pr in db.products on of.productId equals pr.ID
+                          where pr.ID == productId && of.endDateTime > DateTime.Now && of.startDateTime < DateTime.Now
+                          select of);
+
+            
 
             if (Offers == null)
             {
