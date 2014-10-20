@@ -52,14 +52,16 @@ namespace LocateSense.Controllers
         /// <param name="UUID">Product UUID</param>
         /// <param name="file">Image file</param>
         /// <returns>Absolute URL of image</returns>
-        [HttpPost]
         public ActionResult SaveInstallationImage(string userGUID, string UUID, HttpPostedFileBase file)
         {
-            var user = db.users.Where(x => x.guid == userGUID).SingleOrDefault();
-            if (user == null) return Json(new { message = "No user" }, JsonRequestBehavior.AllowGet);
-            if (user.level != 1) return Json(new { message = "User is not retailer" }, JsonRequestBehavior.AllowGet);
+            var user = db.users.Where(x => x.guid == userGUID);
 
-            var product = db.products.Where(x => x.productOwner == user.ID).SingleOrDefault();
+            if (user.Count() == 0) return Json(new { message = "No user" }, JsonRequestBehavior.AllowGet);
+            if (user.SingleOrDefault().level != 1) return Json(new { message = "User is not retailer" }, JsonRequestBehavior.AllowGet);
+
+            //var productBeacon = db.products.Where(x => x.UUID == UUID).SingleOrDefault();
+            var product = db.products.Where(x => x.UUID == UUID);// && x.productOwner == user.SingleOrDefault().ID);
+
             if (product == null)
             {
                 return Json(new { message = "No product for UUID" }, JsonRequestBehavior.AllowGet);
@@ -73,7 +75,7 @@ namespace LocateSense.Controllers
                 CloudBlobContainer container = blobClient.GetContainerReference("image");
                 CloudBlockBlob blockBlob = container.GetBlockBlobReference(DateTime.Now.ToFileTimeUtc().ToString() + "-" + file.FileName);
                 blockBlob.UploadFromStream(file.InputStream);
-                product.imageInstallationURL = blockBlob.Uri.AbsoluteUri;
+                product.SingleOrDefault().imageInstallationURL = blockBlob.Uri.AbsoluteUri;
                 db.SaveChanges();
                 return Json(new { message = blockBlob.Uri.AbsoluteUri }, JsonRequestBehavior.AllowGet);
             }
@@ -88,14 +90,20 @@ namespace LocateSense.Controllers
         /// <param name="UUID">Product UUID</param>
         /// <param name="file">Image file</param>
         /// <returns>Absolute URL of image</returns>
-        [HttpPost]
+       // [HttpPost]
         public ActionResult SaveProductImage(string userGUID, string UUID, HttpPostedFileBase file)
         {
-            var user = db.users.Where(x => x.guid == userGUID).SingleOrDefault();
-            if (user == null) return Json(new { message = "No user" }, JsonRequestBehavior.AllowGet);
-            if (user.level != 1) return Json(new { message = "User is not retailer" }, JsonRequestBehavior.AllowGet);
+            var user = db.users.Where(x => x.guid == userGUID);
 
-            var product = db.products.Where(x => x.productOwner == user.ID).SingleOrDefault();
+            if (user.Count() == 0) return Json(new { message = "No user" }, JsonRequestBehavior.AllowGet);
+            if (user.SingleOrDefault().level != 1) return Json(new { message = "User is not retailer" }, JsonRequestBehavior.AllowGet);
+
+
+  //          if (user == null) return Json(new { message = "No user" }, JsonRequestBehavior.AllowGet);
+  //          if (user.level != 1) return Json(new { message = "User is not retailer" }, JsonRequestBehavior.AllowGet);
+         //   var userID = user.SingleOrDefault().ID;
+          // var product = db.products.Where(x => x.productOwner == userID);
+            var product = db.products.Where(x => x.UUID == UUID);
             if (product == null)
             {
                 return Json(new { message = "No product for UUID" }, JsonRequestBehavior.AllowGet);
@@ -109,7 +117,7 @@ namespace LocateSense.Controllers
                 CloudBlobContainer container = blobClient.GetContainerReference("image");
                 CloudBlockBlob blockBlob = container.GetBlockBlobReference(DateTime.Now.ToFileTimeUtc().ToString() + "-" + file.FileName);
                 blockBlob.UploadFromStream(file.InputStream);
-                product.imageURL = blockBlob.Uri.AbsoluteUri;
+                product.SingleOrDefault().imageURL = blockBlob.Uri.AbsoluteUri;
                 db.SaveChanges();
                 return Json(new { message = blockBlob.Uri.AbsoluteUri }, JsonRequestBehavior.AllowGet);
             }
@@ -273,11 +281,13 @@ namespace LocateSense.Controllers
                                         string UUID,
                                         string category)
         {
-            var user = db.users.Where(x => x.guid == UserGUID).SingleOrDefault();
-            if (user == null) return Json(new { message = "No user" }, JsonRequestBehavior.AllowGet);
-            if (user.level != 1) return Json(new { message = "User is not retailer" }, JsonRequestBehavior.AllowGet);
+            var user = db.users.Where(x => x.guid == UserGUID);
 
-            var ProductDB = db.products.Where(x => x.UUID == UUID && x.productOwner == user.ID);
+            if (user.Count() == 0) return Json(new { message = "No user" }, JsonRequestBehavior.AllowGet);
+            if (user.SingleOrDefault().level != 1) return Json(new { message = "User is not retailer" }, JsonRequestBehavior.AllowGet);
+            var ProductDB = db.products.Where(x => x.UUID == UUID);
+          
+          //  var ProductDB = db.products.Where(x => x.UUID == UUID && x.productOwner == user.ID);
             if (ProductDB.Count() == 0)
             {
                 if (db.products.Where(x => x.UUID == UUID).SingleOrDefault() != null)
@@ -306,17 +316,17 @@ namespace LocateSense.Controllers
                 }
             }
 
-            if (category != null) ((product)ProductDB).category = catStr;
-            if (availableStock != null)  ((product)ProductDB).availableStock = (int)availableStock;
-            if (imageInstallationURL != null) ((product)ProductDB).imageInstallationURL = imageInstallationURL.ToString();
-            if (imageURL != null)  ((product)ProductDB).imageURL = imageURL.ToString();
-            if (manufacturer != null)  ((product)ProductDB).manufacturer = manufacturer;
-            if (price != null)  ((product)ProductDB).price = (decimal)price;
-            if (productName != null)  ((product)ProductDB).productName = productName.ToString();
+            if (category != null) ProductDB.SingleOrDefault().category = catStr;
+            if (availableStock != null) ProductDB.SingleOrDefault().availableStock = (int)availableStock;
+            if (imageInstallationURL != null) ProductDB.SingleOrDefault().imageInstallationURL = imageInstallationURL.ToString();
+            if (imageURL != null)  ProductDB.SingleOrDefault().imageURL = imageURL.ToString();
+            if (manufacturer != null)  ProductDB.SingleOrDefault().manufacturer = manufacturer;
+            if (price != null)  ProductDB.SingleOrDefault().price = (decimal)price;
+            if (productName != null) ProductDB.SingleOrDefault().productName = productName.ToString();
             db.SaveChanges();
 
             //if new product can add
-            return Json(ProductDB, JsonRequestBehavior.AllowGet);
+            return Json(ProductDB.SingleOrDefault(), JsonRequestBehavior.AllowGet);
 
 
         }

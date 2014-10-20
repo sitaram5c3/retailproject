@@ -14,6 +14,38 @@ namespace LocateSense.Controllers
 
 
         /// <summary>
+        /// Add offer visit and increment offer counter
+        /// </summary>
+        /// <param name="userID">user GUID</param>
+        /// <param name="UUID">beacon UUID</param>
+        /// <returns>status message</returns>
+        public ActionResult addOfferVisit(string userID, string UUID, int offerID)
+        {
+            var productBeacon = db.products.Where(x => x.UUID == UUID);
+            if (productBeacon == null)
+            {
+                return Json(new { message = "Not valid beacon UUID" }, JsonRequestBehavior.AllowGet);
+            }
+
+            var User = db.users.Where(x => x.guid == userID);
+            if (User == null)
+            {
+                return Json(new { message = "Not valid  user" }, JsonRequestBehavior.AllowGet);
+            }
+
+            var productBeaconVist = productBeacon.SingleOrDefault();
+            productBeaconVist.numberOfVisits++;
+            //adds a user to a beacon!!
+            db.locate.Add(new locate { beaconId = productBeacon.SingleOrDefault().ID, userId = User.SingleOrDefault().ID, vistDateTime = DateTime.Now });
+            db.SaveChanges();
+
+            return Json(new { message = "offer visit sucessfully logged" }, JsonRequestBehavior.AllowGet);
+
+        }
+
+
+
+        /// <summary>
         /// Add beacon visit and increment visit counter
         /// </summary>
         /// <param name="userID">user GUID</param>
