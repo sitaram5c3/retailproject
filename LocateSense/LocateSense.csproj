@@ -150,9 +150,19 @@
     <Compile Include="Controllers\offerController.cs" />
     <Compile Include="Controllers\productController.cs" />
     <Compile Include="Controllers\userController.cs" />
+    <Compile Include="dateModelBinder.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201411240912466_DbMigrationConfiguration.cs" />
+    <Compile Include="Migrations\201411240912466_DbMigrationConfiguration.Designer.cs">
+      <DependentUpon>201411240912466_DbMigrationConfiguration.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201411251015070_DbMigrationConfiguration1.cs" />
+    <Compile Include="Migrations\201411251015070_DbMigrationConfiguration1.Designer.cs">
+      <DependentUpon>201411251015070_DbMigrationConfiguration1.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\locate.cs" />
     <Compile Include="Models\LocateSenseContext.cs" />
     <Compile Include="Models\offer.cs" />
@@ -225,6 +235,7 @@
     <Content Include="Content\Site.css" />
     <None Include="Properties\PublishProfiles\retailproject - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\retailproject - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\retailproject.pubxml" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -273,6 +284,14 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Migrations\201411240912466_DbMigrationConfiguration.resx">
+      <DependentUpon>201411240912466_DbMigrationConfiguration.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201411251015070_DbMigrationConfiguration1.resx">
+      <DependentUpon>201411251015070_DbMigrationConfiguration1.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

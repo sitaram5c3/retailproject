@@ -49,14 +49,19 @@ namespace LocateSense.Controllers
             offerDB.productId = Product.ID;     
             if (price != null) offerDB.price = price;           
             if (startDateTime != null) offerDB.startDateTime = startDateTime;
+            else offerDB.startDateTime = null;
             if (strapLine != null) offerDB.strapLine = strapLine;
             if (title != null) offerDB.title = title;
             if (endDateTime != null) offerDB.endDateTime = endDateTime;
+            else offerDB.endDateTime = null;
             if (description != null) offerDB.description = description;
-             db.offers.Add(offerDB);
-             db.SaveChanges();
-             return Json( offerDB, JsonRequestBehavior.AllowGet);
-
+            offerDB.deleted = false;
+            offerDB.enalbed = true;
+            if (startDateTime == null && endDateTime == null) offerDB.alwaysEnabledOffer = true;
+            else offerDB.alwaysEnabledOffer = false;
+            db.offers.Add(offerDB);
+            db.SaveChanges();
+            return Json( offerDB, JsonRequestBehavior.AllowGet);
         }
         /// <summary>
         /// Updates current offers on system
@@ -103,6 +108,9 @@ namespace LocateSense.Controllers
             if (endDateTime != null) offerUpdate.endDateTime = endDateTime;
             if (description != null) offerUpdate.description = description.ToString();
 
+            if (startDateTime != null && endDateTime != null) offerUpdate.alwaysEnabledOffer = true;
+            else offerUpdate.alwaysEnabledOffer = false;
+
             db.SaveChanges();
 
             return Json(new { message = "Offer sucessfully updated"}, JsonRequestBehavior.AllowGet);
@@ -119,9 +127,11 @@ namespace LocateSense.Controllers
 
             var Offers = (from of in db.offers
                           join pr in db.products on of.productId equals pr.ID
-                          where pr.UUID == beaconUUID && of.endDateTime > DateTime.Now && of.startDateTime < DateTime.Now
+                          where ((pr.UUID.ToLower() == beaconUUID.ToLower() && of.endDateTime > DateTime.Now && of.startDateTime < DateTime.Now)
+                          || (of.alwaysEnabledOffer == true) && of.deleted == false)
                           select of);
 
+    
 
             if (Offers == null)
             {
@@ -165,7 +175,8 @@ namespace LocateSense.Controllers
 
             var Offers = (from of in db.offers
                           join pr in db.products on of.productId equals pr.ID
-                          where pr.ID == productId && of.endDateTime > DateTime.Now && of.startDateTime < DateTime.Now
+                          where (((pr.ID == productId && of.endDateTime > DateTime.Now && of.startDateTime < DateTime.Now)
+                          || of.alwaysEnabledOffer == true) && of.deleted == false)
                           select of);
 
             
@@ -175,35 +186,65 @@ namespace LocateSense.Controllers
                 return Json(new { message = "No offers for this product" }, JsonRequestBehavior.AllowGet);
             }
 
-            return Json(Offers.ToList(), JsonRequestBehavior.AllowGet);
+            return Json(Offers.OrderByDescending(of => of.ID).ToList(), JsonRequestBehavior.AllowGet);
         }
 
 
         /// <summary>
-        /// Disables an offer
+        /// Deletes the offer
         /// </summary>
-        /// <param name="userId">user guid</param>
-        /// <param name="offerId">offer id</param>
         /// <returns></returns>
-        public ActionResult disableOffer(string userGUID, int offerId)
+        public bool deleteOffer(int offerId)
         {
-            user User = db.users.Where(x => x.guid == userGUID).SingleOrDefault();
-            if (User == null) return Json(new { message = "Incorrect user" }, JsonRequestBehavior.AllowGet);
-
-            var offerDisable = (from of in db.offers
-                        join pr in db.products on of.productId equals pr.ID
-                        where pr.productOwner == User.ID && of.ID == offerId
-                        select of);
-
-            if (offerDisable == null) return Json(new { message = "Incorrect offerId" }, JsonRequestBehavior.AllowGet);
-
-            offer OfferDB = db.offers.Where(x => x.ID == offerId).SingleOrDefault();
-            OfferDB.endDateTime = DateTime.Now;
-            db.SaveChanges();
-
-            return Json(new { message = "Offer disabled" }, JsonRequestBehavior.AllowGet);
+            try
+            {
+                offer offerUpdate = db.offers.Where(x => x.ID == offerId).SingleOrDefault();
+                offerUpdate.deleted = true;
+                db.SaveChanges();
+                return true;
+            }
+            catch (Exception ex) { }
+            return false;
 
         }
+
+        /// <summary>
+        /// Disable offer
+        /// </summary>
+        /// <param name="offerId"></param>
+        public bool disableOffer(int offerId){
+
+            try
+            {
+                offer offerUpdate = db.offers.Where(x => x.ID == offerId).SingleOrDefault();
+                offerUpdate.enalbed = true;
+                db.SaveChanges();
+                return true;
+            }
+            catch (Exception ex) {}
+            return false;
+
+        }
+       
+        /// <summary>
+        ///  Enables the offer
+        /// </summary>
+        /// <param name="offerId"></param>
+        /// <returns></returns>
+        public bool enableOffer(int offerId){
+
+            try
+            {
+                offer offerUpdate = db.offers.Where(x => x.ID == offerId).SingleOrDefault();
+                offerUpdate.enalbed = true;
+                db.SaveChanges();
+                return true;
+            }
+            catch (Exception ex) { }
+            return false;
+
+        }
+
 
 
 

@@ -7,6 +7,7 @@ namespace LocateSense.Models
 {
     public class offer
     {
+
         public int ID { set; get; }
         public DateTime? startDateTime { set; get; }
         public DateTime? endDateTime { set; get; }
@@ -16,6 +17,9 @@ namespace LocateSense.Models
         public decimal? price {set; get;}
         public int productId {set; get;}
 
+        public bool? enalbed { set; get; }
+        public bool? deleted { set; get; }
+        public bool? alwaysEnabledOffer { set; get; }
         public enum dayFilterenum
         {
             Sun,

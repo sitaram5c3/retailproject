@@ -25,6 +25,10 @@ namespace LocateSense
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
 
+        //    var binder = new LocateSense.MyBinder.DateTimeModelBinder("date time format here!!");
+        //    ModelBinders.Binders.Add(typeof(DateTime), binder);
+        //    ModelBinders.Binders.Add(typeof(DateTime?), binder);
+
          //   if (bool.Parse(ConfigurationManager.AppSettings["MigrateDatabaseToLatestVersion"]))
           //  {
            //     var configuration = new LocateSense.Migrations.Configuration();

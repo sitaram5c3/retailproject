@@ -265,6 +265,59 @@ namespace LocateSense.Controllers
             return Json(Product, JsonRequestBehavior.AllowGet);
         }
 
+
+        /// <summary>
+        /// Retailer can add a product to beacon here
+        /// </summary>
+        public JsonResult addNewBeacon(string UserGUID,
+                                        string manufacturer,
+                                        string productName,
+                                        HttpPostedFileBase imageFile,
+                                        int? availableStock,
+                                        int? numberOfVisits,
+                                        decimal? price,
+                                        string UUID,
+                                        string category)
+        {
+
+            var user = db.users.Where(x => x.guid == UserGUID);
+            if (user.Count() == 0) return Json(new { message = "No user" }, JsonRequestBehavior.AllowGet);
+            if (user.SingleOrDefault().level != 1) return Json(new { message = "User is not retailer" }, JsonRequestBehavior.AllowGet);
+            var productBeacon = db.products.Where(x => x.UUID == UUID).SingleOrDefault();
+
+            if (productBeacon != null)
+            {
+                return Json(new { message = "This beacon already on system" }, JsonRequestBehavior.AllowGet);
+            }
+            product Product = new product();
+            Product.productOwner = user.SingleOrDefault().ID;
+            Product.UUID = UUID;
+
+            if (imageFile != null && imageFile.ContentLength > 0)
+            {
+                CloudStorageAccount storageAccount = CloudStorageAccount.Parse(
+                CloudConfigurationManager.GetSetting("StorageConnectionString"));
+                CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
+                CloudBlobContainer container = blobClient.GetContainerReference("image");
+                CloudBlockBlob blockBlob = container.GetBlockBlobReference(DateTime.Now.ToFileTimeUtc().ToString() + "-" + imageFile.FileName);
+                blockBlob.UploadFromStream(imageFile.InputStream);
+                Product.imageInstallationURL = blockBlob.Uri.AbsoluteUri;
+            }
+
+            Product.manufacturer = manufacturer;
+            Product.productName = productName;
+            if (availableStock != null) Product.availableStock = (int)availableStock;
+            if (numberOfVisits != null) Product.numberOfVisits = (int)numberOfVisits;
+            if (price != null) Product.price = (decimal)price;
+            Product.category = @"\";
+            db.products.Add(((product)Product));
+            db.SaveChanges();
+            //if new product can add
+            return Json(Product, JsonRequestBehavior.AllowGet);
+        }
+
+
+
         /// <summary>
         /// updates the product
         /// </summary>
