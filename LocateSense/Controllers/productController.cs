@@ -229,41 +229,41 @@ namespace LocateSense.Controllers
         /// <param name="UUID">UUID beacon ID</param>
         /// <param name="Product">product model</param>
         /// <returns>Product object</returns>
-        public JsonResult addNewBeacon( string UserGUID, 
-                                        string manufacturer, 
-                                        string productName, 
-                                        string imageURL, 
-                                        string imageInstallationURL, 
-                                        int? availableStock, 
-                                        int? numberOfVisits, 
-                                        decimal? price, 
-                                        string UUID,
-                                        string category   )
-        {
-            var user = db.users.Where(x => x.guid == UserGUID);
-            if (user.Count() == 0) return Json(new { message = "No user" }, JsonRequestBehavior.AllowGet);
-            if (user.SingleOrDefault().level != 1) return Json(new { message = "User is not retailer" }, JsonRequestBehavior.AllowGet);
-            var productBeacon = db.products.Where(x => x.UUID == UUID).SingleOrDefault();
+        //public JsonResult addNewBeacon( string UserGUID, 
+        //                                string manufacturer, 
+        //                                string productName, 
+        //                                string imageURL, 
+        //                                string imageInstallationURL, 
+        //                                int? availableStock, 
+        //                                int? numberOfVisits, 
+        //                                decimal? price, 
+        //                                string UUID,
+        //                                string category   )
+        //{
+        //    var user = db.users.Where(x => x.guid == UserGUID);
+        //    if (user.Count() == 0) return Json(new { message = "No user" }, JsonRequestBehavior.AllowGet);
+        //    if (user.SingleOrDefault().level != 1) return Json(new { message = "User is not retailer" }, JsonRequestBehavior.AllowGet);
+        //    var productBeacon = db.products.Where(x => x.UUID == UUID).SingleOrDefault();
             
-            if (productBeacon != null)
-            {
-                return Json(new { message = "This beacon already on system" }, JsonRequestBehavior.AllowGet);
-            }
-            product Product = new product();
-            Product.productOwner = user.SingleOrDefault().ID;
-            Product.UUID = UUID;
+        //    if (productBeacon != null)
+        //    {
+        //        return Json(new { message = "This beacon already on system" }, JsonRequestBehavior.AllowGet);
+        //    }
+        //    product Product = new product();
+        //    Product.productOwner = user.SingleOrDefault().ID;
+        //    Product.UUID = UUID;
 
-            Product.manufacturer =  manufacturer;
-            Product.productName  = productName;       
-            if(availableStock != null) Product.availableStock = (int)availableStock;
-            if(numberOfVisits != null) Product.numberOfVisits = (int)numberOfVisits;
-            if (price != null) Product.price = (decimal)price;
-            Product.category = @"\";
-            db.products.Add(((product)Product));
-            db.SaveChanges();
-            //if new product can add
-            return Json(Product, JsonRequestBehavior.AllowGet);
-        }
+        //    Product.manufacturer =  manufacturer;
+        //    Product.productName  = productName;       
+        //    if(availableStock != null) Product.availableStock = (int)availableStock;
+        //    if(numberOfVisits != null) Product.numberOfVisits = (int)numberOfVisits;
+        //    if (price != null) Product.price = (decimal)price;
+        //    Product.category = @"\";
+        //    db.products.Add(((product)Product));
+        //    db.SaveChanges();
+        //    //if new product can add
+        //    return Json(Product, JsonRequestBehavior.AllowGet);
+        //}
 
 
         /// <summary>
@@ -277,7 +277,9 @@ namespace LocateSense.Controllers
                                         int? numberOfVisits,
                                         decimal? price,
                                         string UUID,
-                                        string category)
+                                        string category,
+                                        string imageURL, 
+                                        string imageInstallationURL)
         {
 
             var user = db.users.Where(x => x.guid == UserGUID);
@@ -292,7 +294,6 @@ namespace LocateSense.Controllers
             product Product = new product();
             Product.productOwner = user.SingleOrDefault().ID;
             Product.UUID = UUID;
-
             if (imageFile != null && imageFile.ContentLength > 0)
             {
                 CloudStorageAccount storageAccount = CloudStorageAccount.Parse(
@@ -308,6 +309,16 @@ namespace LocateSense.Controllers
             Product.productName = productName;
             if (availableStock != null) Product.availableStock = (int)availableStock;
             if (numberOfVisits != null) Product.numberOfVisits = (int)numberOfVisits;
+
+            if (!String.IsNullOrEmpty(imageURL))
+            {
+                Product.imageURL = imageURL;
+            }
+            if (!String.IsNullOrEmpty(imageInstallationURL))
+            {
+                Product.imageInstallationURL = imageInstallationURL;
+            } 
+            
             if (price != null) Product.price = (decimal)price;
             Product.category = @"\";
             db.products.Add(((product)Product));

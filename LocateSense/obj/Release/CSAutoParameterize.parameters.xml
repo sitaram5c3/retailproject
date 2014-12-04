@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <parameters>
   <parameter name="LocateSenseContext-Web.config Connection String" description="LocateSenseContext Connection String used in web.config by the application to access the database." defaultValue="Data Source=oieqxbnmbs.database.windows.net;Integrated Security=False;User ID=apiservice;Initial Catalog=beacons; Password=Instantview_2014;Connect Timeout=60;Encrypt=False;TrustServerCertificate=False" tags="SqlConnectionString">
-    <parameterEntry kind="XmlFile" scope="C:\\Users\\edward\ mellor\\Documents\\Visual\ Studio\ 2013\\Projects\\LocateSense\\retailproject\\LocateSense\\obj\\Release\\Package\\PackageTmp\\Web\.config$" match="/configuration/connectionStrings/add[@name='LocateSenseContext']/@connectionString" />
+    <parameterEntry kind="XmlFile" scope="C:\\Data\\Git\\retailproject\\LocateSense\\obj\\Release\\Package\\PackageTmp\\Web\.config$" match="/configuration/connectionStrings/add[@name='LocateSenseContext']/@connectionString" />
   </parameter>
 </parameters>

@@ -57,7 +57,7 @@ namespace LocateSense.Controllers
             if (description != null) offerDB.description = description;
             offerDB.deleted = false;
             offerDB.enalbed = true;
-            if (startDateTime == null && endDateTime == null) offerDB.alwaysEnabledOffer = true;
+            if (startDateTime == null || endDateTime == null) offerDB.alwaysEnabledOffer = true;
             else offerDB.alwaysEnabledOffer = false;
             db.offers.Add(offerDB);
             db.SaveChanges();
@@ -108,7 +108,7 @@ namespace LocateSense.Controllers
             if (endDateTime != null) offerUpdate.endDateTime = endDateTime;
             if (description != null) offerUpdate.description = description.ToString();
 
-            if (startDateTime != null && endDateTime != null) offerUpdate.alwaysEnabledOffer = true;
+            if (startDateTime != null || endDateTime != null) offerUpdate.alwaysEnabledOffer = true;
             else offerUpdate.alwaysEnabledOffer = false;
 
             db.SaveChanges();
@@ -122,24 +122,49 @@ namespace LocateSense.Controllers
         /// </summary>
         /// <param name="productId">pass in product ID NOT UUID</param>
         /// <returns></returns>
-        public ActionResult getProductOffersByUUID(string beaconUUID)
+        public ActionResult getProductOffersByUUID(string beaconUUID, string userGUID)
         {
+             var user = db.users.Where(x => x.guid == userGUID);
+             if (user.Count() == 0) return Json(new { message = "No user" }, JsonRequestBehavior.AllowGet);
+             if (user.SingleOrDefault().level == 1)
+             {
+                 var Offers = (from of in db.offers
+                               join pr in db.products on of.productId equals pr.ID
+                               where  ( of.deleted == false)
+                               select of);
 
-            var Offers = (from of in db.offers
-                          join pr in db.products on of.productId equals pr.ID
-                          where ((pr.UUID.ToLower() == beaconUUID.ToLower() && of.endDateTime > DateTime.Now && of.startDateTime < DateTime.Now)
-                          || (of.alwaysEnabledOffer == true) && of.deleted == false)
-                          select of);
+                 if (Offers == null)
+                 {
+                     //Offers.Where(of => dayFilter(of.productId));
+                     return Json(new { message = "No offers for this product" }, JsonRequestBehavior.AllowGet);
+                 }
+                 else
+                 {
+                     return Json(Offers.ToList(), JsonRequestBehavior.AllowGet);
+                 }
+             }
+             else
+             {
+                 var Offers = (from of in db.offers
+                               join pr in db.products on of.productId equals pr.ID
+                               where ((pr.UUID.ToLower() == beaconUUID.ToLower() && of.endDateTime > DateTime.Now && of.startDateTime < DateTime.Now)
+                               || (of.alwaysEnabledOffer == true) && of.deleted == false)
+                               select of);
 
-    
+                 if (Offers == null)
+                 {
+                     //Offers.Where(of => dayFilter(of.productId));
+                     return Json(new { message = "No offers for this product" }, JsonRequestBehavior.AllowGet);
+                 }
+                 else
+                 {
+                     return Json(Offers.ToList(), JsonRequestBehavior.AllowGet);
+                 }
+             }
 
-            if (Offers == null)
-            {
-                //Offers.Where(of => dayFilter(of.productId));
-                return Json(new { message = "No offers for this product" }, JsonRequestBehavior.AllowGet);
-            }
+             return Json(new { message = "No offers for this product" }, JsonRequestBehavior.AllowGet);
 
-            return Json(Offers.ToList(), JsonRequestBehavior.AllowGet);
+           
         }
 
         Func<int, string> func1 = (x) => string.Format("string = {0}", x);
